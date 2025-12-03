@@ -1,15 +1,47 @@
 PUZZLE_INPUT_PATH = "../../puzzle-inputs/day2"
 
+def is_repeating(str_id: str, slice_length: int):
+    """Given a string and a slice length which divides its length, return whether the value repeats"""
+    total_slices = int(len(str_id) / slice_length)
+    slice_start = 0
+    slice_end = slice_length
+    str_slices = set()
+    for _ in range(0, total_slices):
+        str_slices.add(str_id[slice_start:slice_end])
+        slice_start += slice_length
+        slice_end += slice_length
+    return len(str_slices) == 1
+
+def yield_next_divisor(total, current_divisor):
+    """Iteratively find the next divisor and yield it"""
+    current_value = current_divisor - 1
+    while current_value != 0:
+        if total % current_value == 0:
+            yield current_value
+        current_value -= 1
+
 def is_valid(id: int):
-    """Check if an ID is invalid"""
+    """Check if an ID is valid"""
     str_id = str(id)
-    # We already know it can't be 2 repeated strings if 2 doesn't divide it.
-    if len(str_id) == 1 or len(str_id) % 2 != 0:
+    if len(str_id) == 1:
         return True
-    middle = int(len(str_id) / 2)
-    if str_id[0:middle] == str_id[middle:]:
-        return False
-    return True
+    any_repeating = [
+        is_repeating(str_id, divisor)
+        for divisor in yield_next_divisor(len(str_id), len(str_id))
+    ]
+    return not any(any_repeating)
+
+# Part 1 solution:
+# def is_valid(id: int):
+#     """Check if an ID is valid"""
+#     str_id = str(id)
+#     # We already know it can't be 2 repeated strings if 2 doesn't divide it.
+#     if len(str_id) == 1 or len(str_id) % 2 != 0:
+#         return True
+#     middle = int(len(str_id) / 2)
+#     if str_id[0:middle] == str_id[middle:]:
+#         return False
+#     return True
 
 def get_invalid_ids(ids: list[int]) -> list[int]:
     invalid_ids = []
