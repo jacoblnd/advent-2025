@@ -1,9 +1,10 @@
 PUZZLE_INPUT_PATH = "../../puzzle-inputs/day4"
 
+EMPTY_CHAR = "."
 ROLL_CHAR = "@"
 MAX_ADJACENT_ROLLS = 3
 
-def is_corner(i: int, j: int, grid: list[str]):
+def is_corner(i: int, j: int, grid: list):
     if i == 0 and j == 0:
         return True
     if i == 0 and j == len(grid[0])-1:
@@ -14,11 +15,11 @@ def is_corner(i: int, j: int, grid: list[str]):
         return True
     return False
 
-def out_of_bounds(i: int, j: int, grid: list[str]) -> bool:
+def out_of_bounds(i: int, j: int, grid: list) -> bool:
     return i < 0 or j < 0 or i >= len(grid) or j >= len(grid[0])
 
 
-def is_accessible(i: int, j: int, grid: list[str]) -> bool:
+def is_accessible(i: int, j: int, grid: list) -> bool:
     # handle literal corner cases first.
     if is_corner(i, j, grid):
         return True
@@ -34,13 +35,32 @@ def is_accessible(i: int, j: int, grid: list[str]) -> bool:
     return adjacent_rolls <= MAX_ADJACENT_ROLLS
 
 def check_grid(grid):
-    accessible_rolls = 0
+    removed_rolls = 0
+    new_grid = []
     for i, row in enumerate(grid):
+        new_line = []
         for j, cell in enumerate(row):
-            if cell == ROLL_CHAR and is_accessible(i, j, grid):
-                    accessible_rolls += 1
+            if cell == EMPTY_CHAR:
+                new_line.append(EMPTY_CHAR)
+            if cell == ROLL_CHAR:
+                if is_accessible(i, j, grid):
+                    removed_rolls += 1
+                    new_line.append(EMPTY_CHAR)
+                else:
+                    new_line.append(ROLL_CHAR)
+        new_grid.append(new_line)
 
-    return accessible_rolls
+    return removed_rolls, new_grid
+
+def continuously_remove_rolls(grid):
+    new_grid = grid
+    removed_rolls = 0
+    while True:
+        newly_removed_rolls, new_grid = check_grid(new_grid)
+        if newly_removed_rolls == 0:
+            return removed_rolls
+        else:
+            removed_rolls += newly_removed_rolls
 
 def build_grid():
     with open(PUZZLE_INPUT_PATH) as file:
@@ -48,4 +68,5 @@ def build_grid():
 
 
 if __name__ == "__main__":
-    print(check_grid(build_grid()))
+    # print(check_grid(build_grid()))
+    print(continuously_remove_rolls(build_grid()))
